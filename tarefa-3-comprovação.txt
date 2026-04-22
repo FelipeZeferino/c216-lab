@@ -1,0 +1,15 @@
+backend-1  | INFO:     Started server process [1]
+backend-1  | INFO:     Waiting for application startup.
+backend-1  | INFO:     Application startup complete.
+backend-1  | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+
+
+========================================================================================== test session starts ===========================================================================================
+platform darwin -- Python 3.9.6, pytest-8.4.2, pluggy-1.6.0
+rootdir: /Users/felipe/Desktop/1 Projects/Inatel/C216/lab
+plugins: anyio-4.12.1
+collected 7 items                                                                                                                                                                                        
+
+tests/test_api.py .......                                                                                                                                                                          [100%]
+
+=========================================================================================== 7 passed in 0.36s ============================================================================================
