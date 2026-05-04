@@ -1,6 +1,9 @@
 services:
-  backend:
+  api:
     build: .
     restart: always
     ports:
       - "8000:8000"
+  tests:
+    build: .
+    command: pytest -q
