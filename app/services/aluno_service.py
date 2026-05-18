@@ -1,61 +1,99 @@
+from app.db.connection import get_connection
 from app.schemas.aluno import Aluno, AlunoCreate, AlunoUpdate, CursoEnum
 
 
 class AlunoService:
-    def __init__(self) -> None:
-        self._alunos: list[Aluno] = []
-        self._counters: dict[CursoEnum, int] = {CursoEnum.GES: 0, CursoEnum.GEC: 0}
+    _SEQUENCES = {
+        CursoEnum.GES: "alunos_ges_matricula_seq",
+        CursoEnum.GEC: "alunos_gec_matricula_seq",
+    }
 
-    def listar(self) -> list[Aluno]:
-        return self._alunos
+    async def listar(self) -> list[Aluno]:
+        conn = await get_connection()
+        try:
+            rows = await conn.fetch(
+                """
+                SELECT id, nome, email, curso, matricula
+                FROM alunos
+                ORDER BY curso, matricula
+                """
+            )
+            return [Aluno(**dict(row)) for row in rows]
+        finally:
+            await conn.close()
 
-    def buscar_por_id(self, aluno_id: str) -> Aluno | None:
-        for aluno in self._alunos:
-            if aluno.id == aluno_id:
-                return aluno
-        return None
+    async def buscar_por_id(self, aluno_id: str) -> Aluno | None:
+        conn = await get_connection()
+        try:
+            row = await conn.fetchrow(
+                """
+                SELECT id, nome, email, curso, matricula
+                FROM alunos
+                WHERE id = $1
+                """,
+                aluno_id,
+            )
+            return Aluno(**dict(row)) if row else None
+        finally:
+            await conn.close()
 
-    def criar(self, aluno_data: AlunoCreate) -> Aluno:
-        self._counters[aluno_data.curso] += 1
-        matricula = self._counters[aluno_data.curso]
-        aluno = Aluno(
-            id=f"{aluno_data.curso.value}{matricula}",
-            nome=aluno_data.nome,
-            email=aluno_data.email,
-            curso=aluno_data.curso,
-            matricula=matricula,
-        )
-        self._alunos.append(aluno)
-        return aluno
+    async def criar(self, aluno_data: AlunoCreate) -> Aluno:
+        conn = await get_connection()
+        try:
+            sequence_name = self._SEQUENCES[aluno_data.curso]
+            matricula = await conn.fetchval(f"SELECT nextval('{sequence_name}')")
+            aluno_id = f"{aluno_data.curso.value}{matricula}"
 
-    def atualizar(self, aluno_id: str, aluno_data: AlunoUpdate) -> Aluno | None:
-        aluno = self.buscar_por_id(aluno_id)
-        if aluno is None:
-            return None
+            row = await conn.fetchrow(
+                """
+                INSERT INTO alunos (id, nome, email, curso, matricula)
+                VALUES ($1, $2, $3, $4, $5)
+                RETURNING id, nome, email, curso, matricula
+                """,
+                aluno_id,
+                aluno_data.nome,
+                aluno_data.email,
+                aluno_data.curso.value,
+                matricula,
+            )
+            return Aluno(**dict(row))
+        finally:
+            await conn.close()
 
-        if aluno_data.nome is not None:
-            aluno.nome = aluno_data.nome
-        if aluno_data.email is not None:
-            aluno.email = aluno_data.email
+    async def atualizar(self, aluno_id: str, aluno_data: AlunoUpdate) -> Aluno | None:
+        conn = await get_connection()
+        try:
+            row = await conn.fetchrow(
+                """
+                UPDATE alunos
+                SET
+                    nome = COALESCE($1, nome),
+                    email = COALESCE($2, email)
+                WHERE id = $3
+                RETURNING id, nome, email, curso, matricula
+                """,
+                aluno_data.nome,
+                aluno_data.email,
+                aluno_id,
+            )
+            return Aluno(**dict(row)) if row else None
+        finally:
+            await conn.close()
 
-        return aluno
+    async def deletar(self, aluno_id: str) -> bool:
+        conn = await get_connection()
+        try:
+            result = await conn.execute("DELETE FROM alunos WHERE id = $1", aluno_id)
+            return result == "DELETE 1"
+        finally:
+            await conn.close()
 
-    def deletar(self, aluno_id: str) -> bool:
-        aluno = self.buscar_por_id(aluno_id)
-        if aluno is None:
-            return False
-
-        self._alunos.remove(aluno)
-        return True
-
-    def limpar(self) -> None:
-        self._alunos.clear()
-
-    def reset_state(self, reset_counters: bool = False) -> None:
-        self._alunos.clear()
-        if reset_counters:
-            self._counters = {CursoEnum.GES: 0, CursoEnum.GEC: 0}
+    async def limpar(self) -> None:
+        conn = await get_connection()
+        try:
+            await conn.execute("DELETE FROM alunos")
+        finally:
+            await conn.close()
 
 
 aluno_service = AlunoService()
-

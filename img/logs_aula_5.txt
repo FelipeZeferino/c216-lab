@@ -1,0 +1,47 @@
+# Health check
+GET /
+→ {"mensagem":"API funcionando"}
+
+# Criar aluno
+POST /api/v1/alunos/
+→ {"id":"GES1","nome":"Maria","email":"maria@inatel.br","curso":"GES","matricula":1}
+
+# Listar alunos
+GET /api/v1/alunos/
+→ [{"id":"GES1","nome":"Maria","email":"maria@inatel.br","curso":"GES","matricula":1}]
+
+# Buscar por ID
+GET /api/v1/alunos/GES1
+→ {"id":"GES1","nome":"Maria","email":"maria@inatel.br","curso":"GES","matricula":1}
+
+# Atualizar aluno
+PATCH /api/v1/alunos/GES1
+→ {"id":"GES1","nome":"Maria Silva","email":"m.silva@inatel.br","curso":"GES","matricula":1}
+
+# Listar após update
+GET /api/v1/alunos/
+→ [{"id":"GES1","nome":"Maria Silva","email":"m.silva@inatel.br","curso":"GES","matricula":1}]
+
+# Deletar aluno
+DELETE /api/v1/alunos/GES1
+→ {"mensagem":"Aluno removido com sucesso"}
+
+# Deletar novamente (erro)
+DELETE /api/v1/alunos/GES1
+→ {"detail":"Aluno nao encontrado"}
+
+# Criar novo aluno
+POST /api/v1/alunos/
+→ {"id":"GES2","nome":"Maria","email":"maria@inatel.br","curso":"GES","matricula":2}
+
+# Resetar lista
+DELETE /api/v1/alunos/
+→ {"mensagem":"Lista de alunos resetada com sucesso"}
+
+# Criar após reset
+POST /api/v1/alunos/
+→ {"id":"GES3","nome":"Maria","email":"maria@inatel.br","curso":"GES","matricula":3}
+
+# Listar final
+GET /api/v1/alunos/
+→ [{"id":"GES3","nome":"Maria","email":"maria@inatel.br","curso":"GES","matricula":3}]
