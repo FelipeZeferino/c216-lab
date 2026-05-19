@@ -24,6 +24,16 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/alunos_db
     ports:
       - "8000:8000"
+  frontend:
+    build: ./frontend
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+      api:
+        condition: service_started
+    ports:
+      - "3000:3000"
   tests:
     build: .
     depends_on:

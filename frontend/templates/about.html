@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre o Projeto</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <main class="page-shell">
+        <header class="hero hero-secondary">
+            <p class="eyebrow">Sobre</p>
+            <h1>Como esta aplicacao foi organizada</h1>
+            <p class="hero-copy">
+                A pagina usa templates HTML em <code>frontend/templates</code> e um
+                arquivo CSS em <code>frontend/static</code> para manter a estrutura clara.
+            </p>
+            <nav class="nav-links" aria-label="Navegacao principal">
+                <a href="/">Home</a>
+                <a href="/about">Sobre</a>
+                <a href="/contact">Contato</a>
+            </nav>
+        </header>
+
+        <section class="content-card">
+            <h2>Objetivo da pratica</h2>
+            <p>
+                Esta etapa foca no frontend com Flask, sem integrar chamadas ao backend.
+                O objetivo e entender rotas, templates e arquivos estaticos.
+            </p>
+            <p>
+                Pagina personalizada por Felipe - Matricula: GES511
+            </p>
+        </section>
+    </main>
+</body>
+</html>
